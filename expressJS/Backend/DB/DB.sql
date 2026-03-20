@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXIST furrylanddb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS furrylanddb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
        USE furrylanddb;
 
            CREATE TABLE categories (
@@ -11,5 +11,44 @@ CREATE DATABASE IF NOT EXIST furrylanddb CHARACTER SET utf8mb4 COLLATE utf8mb4_u
                username VARCHAR(50) NOT NULL UNIQUE,
                email VARCHAR(100) NOT NULL UNIQUE,
                password_hash VARCHAR(255) NOT NULL,
-               creates_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+           );
+
+           CREATE TABLE products (
+               id INT AUTO_INCREMENT PRIMARY KEY,
+               category_id INT NOT NULL,
+               name VARCHAR(150) NOT NULL,
+               description TEXT,
+               price DECIMAL(10,2) NOT NULL,
+               stock INT DEFAULT 0,
+               image_url VARCHAR(255),
+               FOREIGN KEY (category_id) REFERENCES categories(id)
+           );
+
+           CREATE TABLE orders (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                users_id INT NOT NULL,
+                status ENUM('pending', 'paid', 'shipped', 'cancelled') DEFAULT 'pending',
+                total_price DECIMAL(10,2) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (users_id) REFERENCES users(id)
+           );
+
+           CREATE TABLE order_items (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                order_id INT NOT NULL,
+                product_id INT NOT NULL,
+                quantity INT NOT NULL,
+                unit_price DECIMAL(10,2) NOT NULL,
+                FOREIGN KEY (order_id) REFERENCES orders(id),
+                FOREIGN KEY (product_id) REFERENCES products(id)
+           );
+
+           CREATE TABLE cart_items (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                product_id INT NOT NULL,
+                quantity INT NOT NULL DEFAULT 1,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (product_id) REFERENCES products(id)
            );
