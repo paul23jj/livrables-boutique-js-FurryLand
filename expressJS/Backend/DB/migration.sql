@@ -27,11 +27,11 @@ CREATE DATABASE IF NOT EXISTS furrylanddb CHARACTER SET utf8mb4 COLLATE utf8mb4_
 
            CREATE TABLE orders (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                users_id INT NOT NULL,
+                user_id INT NOT NULL,
                 status ENUM('pending', 'paid', 'shipped', 'cancelled') DEFAULT 'pending',
                 total_price DECIMAL(10,2) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (users_id) REFERENCES users(id)
+                FOREIGN KEY (user_id) REFERENCES users(id)
            );
 
            CREATE TABLE order_items (
