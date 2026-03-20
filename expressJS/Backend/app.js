@@ -1,15 +1,19 @@
 const express = require('express');
+const connexion = require('./DB/db.js');
+const router = require('./router/router.js');
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-const cors = require('cors');
+app.use('/api', router);
 
-const data = require('./data.json')
+connexion.connect((err) => {
+    if(err) {
+        console.log('Erreur de connexion : '+ err);
+    } else {
+        console.log('Connexion à la BDD réussie');
+    }
+})
 
-app.use(cors({
-    origin: '*'
-}))
-
-//tout à la fin
+//a la fin
 app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`));
