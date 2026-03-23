@@ -5,6 +5,7 @@ const router = require('./router/router.js');
 const app = express();
 const port = process.env.PORT || 8080;
 
+app.use(express.json());
 app.use('/api', router);
 
 connexion.connect((err) => {
