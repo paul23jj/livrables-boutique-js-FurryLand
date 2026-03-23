@@ -61,7 +61,25 @@ const register = (req, res) => {
 }
 
 const login = (req, res) => {
-    connexion.query('INSERT INTO ')
+    connexion.query('SELECT * FROM users WHERE email = ?', [req.body.email], (err, results) => {
+        if(err){
+            res.status(500).json({ error: err});
+        } else if (results.length === 0) {
+            res.status(404).json({ message: 'Utilisateur introuvable'});
+        } else {
+            bcrypt.compare(req.body.password, results[0].password_hash, (err, match) => {
+                if (match === true) {
+                    res.status(200).json({
+                        id: results[0].id,
+                        username: results[0].username,
+                        email: results[0].email
+                    });
+                } else {
+                    res.status(401).json({ message: 'Non autorisé'});
+                }
+            })
+        }
+    });
 }
 
-module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register };
+module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login };
