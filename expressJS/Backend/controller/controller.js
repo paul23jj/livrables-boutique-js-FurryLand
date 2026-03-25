@@ -82,4 +82,14 @@ const login = (req, res) => {
     });
 }
 
-module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login };
+const getCart = (req, res) => {
+    connexion.query('SELECT * FROM cart_items WHERE user_id = ?'), [req.body.user_id], (err, results) => {
+        if (err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    }
+}
+
+module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart };
