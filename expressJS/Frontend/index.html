@@ -5,11 +5,105 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, ">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Title</title>
+    <title>FurryLand Boutique</title>
     <link rel="stylesheet" href="css/main.css">
     <script src="script/main.js" defer></script>
 </head>
 <body>
+    <main id="app">
+        <div class="page-shell">
+            <header class="hero">
+                <div class="hero-copy">
+                    <p class="eyebrow">FurryLand</p>
+                    <h1>Boutique furry et fursuit</h1>
+                    <p class="hero-text">
+                        Explore le catalogue, filtre par categorie et ajoute des articles
+                        dans un panier local pour preparer la suite du front.
+                    </p>
+                </div>
+                <div class="hero-stats">
+                    <article class="stat-card">
+                        <strong id="stat-products">0</strong>
+                        <span>produits</span>
+                    </article>
+                    <article class="stat-card">
+                        <strong id="stat-categories">0</strong>
+                        <span>categories</span>
+                    </article>
+                    <article class="stat-card">
+                        <strong id="stat-stock">0</strong>
+                        <span>en stock</span>
+                    </article>
+                    <article class="stat-card">
+                        <strong id="stat-cart">0</strong>
+                        <span>dans le panier</span>
+                    </article>
+                </div>
+            </header>
 
+            <section class="toolbar" aria-label="Filtres du catalogue">
+                <label class="field">
+                    <span>Recherche</span>
+                    <input
+                        id="search-input"
+                        type="search"
+                        placeholder="Nom, categorie, description..."
+                        autocomplete="off"
+                    >
+                </label>
+
+                <label class="field">
+                    <span>Categorie</span>
+                    <select id="category-select">
+                        <option value="all">Toutes les categories</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Trier par</span>
+                    <select id="sort-select">
+                        <option value="featured">Mis en avant</option>
+                        <option value="price-asc">Prix croissant</option>
+                        <option value="price-desc">Prix decroissant</option>
+                        <option value="stock-desc">Stock disponible</option>
+                        <option value="name-asc">Nom A-Z</option>
+                    </select>
+                </label>
+            </section>
+
+            <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+
+            <section class="layout">
+                <section class="catalogue-panel" aria-labelledby="catalogue-title">
+                    <div class="section-heading">
+                        <div>
+                            <p class="section-overline">Catalogue</p>
+                            <h2 id="catalogue-title">Produits disponibles</h2>
+                        </div>
+                        <p id="results-count" class="results-count">0 resultat</p>
+                    </div>
+                    <div id="products-grid" class="products-grid"></div>
+                </section>
+
+                <aside class="cart-panel" aria-labelledby="cart-title">
+                    <div class="section-heading">
+                        <div>
+                            <p class="section-overline">Panier</p>
+                            <h2 id="cart-title">Selection locale</h2>
+                        </div>
+                        <p id="cart-count" class="results-count">0 article</p>
+                    </div>
+                    <div id="cart-items" class="cart-items"></div>
+                    <div class="cart-summary">
+                        <p>Total estime</p>
+                        <strong id="cart-total">0,00 EUR</strong>
+                    </div>
+                    <button id="clear-cart-button" class="secondary-button" type="button">
+                        Vider le panier
+                    </button>
+                </aside>
+            </section>
+        </div>
+    </main>
 </body>
 </html>
