@@ -1,11 +1,14 @@
 const express = require('express');
 const connexion = require('./DB/db.js');
 const router = require('./router/router.js');
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 app.use(express.json());
+
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/api', router);
 
 connexion.connect((err) => {
