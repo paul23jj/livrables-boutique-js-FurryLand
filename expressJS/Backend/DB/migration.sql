@@ -21,7 +21,9 @@ CREATE DATABASE IF NOT EXISTS furrylanddb CHARACTER SET utf8mb4 COLLATE utf8mb4_
                description TEXT,
                price DECIMAL(10,2) NOT NULL,
                stock INT DEFAULT 0,
-               image_url VARCHAR(255),
+               image_url_1 VARCHAR(255),
+               image_url_2 VARCHAR(255),
+               image_url_3 VARCHAR(255),
                FOREIGN KEY (category_id) REFERENCES categories(id)
            );
 
