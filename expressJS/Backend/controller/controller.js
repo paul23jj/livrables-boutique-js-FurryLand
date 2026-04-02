@@ -125,4 +125,16 @@ const getOrders = (req, res) => {
     });
 }
 
-module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart, addToCart, deleteFromCart, getOrders };
+const createOrder = (req, res) => {
+    const user_id = req.body.user_id;
+    const total_price = req.body.total_price;
+    connexion.query('INSERT INTO orders (user_id, total_price) VALUES (?, ?)', [user_id, total_price], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart, addToCart, deleteFromCart, getOrders, createOrder };
