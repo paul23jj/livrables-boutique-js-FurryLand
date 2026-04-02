@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart  } = require('../controller/controller.js');
+const { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart, addToCart, deleteFromCart, getOrders  } = require('../controller/controller.js');
 
 router.get('/products', getProducts);
 router.get('/products/:id', getProductById);
@@ -11,5 +11,9 @@ router.post('/register', register);
 router.post('/login', login);
 
 router.get('/cart/:user_id', getCart);
+router.post('/cart', addToCart);
+router.delete('/cart/:id', deleteFromCart);
+
+router.post('/api/orders/:user_id', getOrders);
 
 module.exports = router;

@@ -2,14 +2,21 @@ const express = require('express');
 const connexion = require('./DB/db.js');
 const router = require('./router/router.js');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 8080;
 
+app.use(cors());
 app.use(express.json());
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use(express.static(path.join(__dirname, '..', 'Frontend')));
 app.use('/api', router);
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'Frontend', 'index.html'));
+});
 
 connexion.connect((err) => {
     if(err) {

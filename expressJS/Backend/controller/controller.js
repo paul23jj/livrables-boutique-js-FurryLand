@@ -92,4 +92,37 @@ const getCart = (req, res) => {
     });
 }
 
-module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart };
+const addToCart = (req, res) => {
+    const user_id = req.body.user_id;
+    const product_id = req.body.product_id;
+    const quantity = req.body.quantity;
+    connexion.query('INSERT INTO cart_items (user_id, product_id, quantity) VALUES(?, ?, ?)', [user_id, product_id, quantity], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const deleteFromCart = (req, res) => {
+    connexion.query('DELETE FROM cart_items WHERE id = ?', [req.params.id], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const getOrders = (req, res) => {
+    connexion.query('SELECT * FROM orders WHERE user_id = ?', [req.params.user_id], (err, results) => {
+        if (err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart, addToCart, deleteFromCart, getOrders };
