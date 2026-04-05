@@ -1,0 +1,34 @@
+.product-media {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden; /* masque les images qui débordnt à droite*/
+    border-radius: 8px 8px 0 0;
+}
+
+.product-slider {
+    display: flex;
+    height: 100%;
+    transition: transform 0.3s ease; /* fluidité du mouvement*/
+}
+
+.product-slider img {
+    flex: 0 0 100%; /* pour que l'img prenne toute la place*/
+    height: 100%;
+    object-fit: cover;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 12px 8px;
+    cursor: pointer;
+    z-index: 2;
+    border-radius: 4px;
+}
+.slider-btn.prev { left: 10px; }
+.slider-btn.next { right: 10px; }

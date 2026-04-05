@@ -1,8 +1,6 @@
 (() => {
     const configuredApiBase = document.body.dataset.apiBase || document.documentElement.dataset.apiBase;
-    const fallbackApiBase = window.location.protocol === 'file:'
-        ? 'http://localhost:8080/api'
-        : `${window.location.origin}/api`;
+    const fallbackApiBase = `${window.location.origin}/api`;
     const API_BASE = configuredApiBase || fallbackApiBase;
     const CART_STORAGE_KEY = 'furryland-cart';
     const currencyFormatter = new Intl.NumberFormat('fr-FR', {
@@ -19,7 +17,8 @@
         cart: loadCart(),
         isLoading: true,
         statusText: 'Chargement du catalogue...',
-        statusType: 'info'
+        statusType: 'info',
+        carouselIndices: {}
     };
 
     const refs = {};
@@ -59,6 +58,15 @@
         refs.statCart = root.querySelector('#stat-cart');
     }
 
+    function updateSliderPosition (productId) {
+        const currentIndex = state.carouselIndices[productId] || 0;
+
+        const card = document.querySelector(`[data-product-id="${productId}"]`);
+        const slider = card.querySelector('.product-slider');
+
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+    }
+
     function bindEvents() {
         refs.searchInput.addEventListener('input', (event) => {
             state.searchTerm = event.target.value.trim();
@@ -88,6 +96,35 @@
         });
 
         refs.root.addEventListener('click', (event) => {
+            const sliderBtn = event.target.closest('[data-slider-action]');
+            if (sliderBtn) {
+                const action = sliderBtn.dataset.sliderAction; // "prev" ou "next"
+                const productId = Number(sliderBtn.closest('[data-product-id]').dataset.productId);
+                const product = state.products.find(p => p.id === productId);
+
+                // On initialise l'index si c'est le premier clic
+                if (state.carouselIndices[productId] === undefined) {
+                    state.carouselIndices[productId] = 0;
+                }
+
+                if (action === 'next') {
+                    // On avance, mais on ne dépasse pas la dernière image
+                    if (state.carouselIndices[productId] < product.gallery.length - 1) {
+                        state.carouselIndices[productId]++;
+                    } else {
+                        state.carouselIndices[productId] = 0; // Optionnel : boucle au début
+                    }
+                } else {
+                    // On recule, mais on ne descend pas en dessous de 0
+                    if (state.carouselIndices[productId] > 0) {
+                        state.carouselIndices[productId]--;
+                    } else {
+                        state.carouselIndices[productId] = product.gallery.length - 1; // Optionnel : boucle à la fin
+                    }
+                }
+
+                updateSliderPosition(productId);
+            }
             const addButton = event.target.closest('[data-add-to-cart]');
             if (addButton) {
                 addToCart(Number(addButton.dataset.addToCart));
@@ -240,39 +277,40 @@
         const visibleProducts = getVisibleProducts();
         refs.resultsCount.textContent = `${visibleProducts.length} ${pluralize(visibleProducts.length, 'resultat', 'resultats')}`;
 
+        // --- BLOCS DE SÉCURITÉ (Skeletons, Erreurs, Vide) ---
         if (state.isLoading) {
             refs.productsGrid.innerHTML = Array.from({ length: 6 }, () => `
-                <article class="product-card skeleton-card" aria-hidden="true">
-                    <div class="skeleton-media"></div>
-                    <div class="skeleton-line"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                </article>
-            `).join('');
+            <article class="product-card skeleton-card" aria-hidden="true">
+                <div class="skeleton-media"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line"></div>
+            </article>
+        `).join('');
             return;
         }
 
         if (state.products.length === 0) {
-            refs.productsGrid.innerHTML = `
-                <article class="empty-state">
-                    <h3>Aucun produit charge</h3>
-                    <p>Verifie que le backend est demarre et que l'API repond bien sur \`${API_BASE}/products\`.</p>
-                </article>
-            `;
+            refs.productsGrid.innerHTML = `<article class="empty-state"><h3>Aucun produit chargé</h3>...</article>`;
             return;
         }
 
         if (visibleProducts.length === 0) {
-            refs.productsGrid.innerHTML = `
-                <article class="empty-state">
-                    <h3>Aucun resultat</h3>
-                    <p>Essaie une autre recherche ou retire le filtre de categorie.</p>
-                </article>
-            `;
+            refs.productsGrid.innerHTML = `<article class="empty-state"><h3>Aucun résultat</h3>...</article>`;
             return;
         }
 
+        // --- ÉTAPE 1 : ON DESSINE TOUT D'UN COUP ---
+        // On génère TOUT le HTML et on l'injecte une seule fois.
         refs.productsGrid.innerHTML = visibleProducts.map((product) => createProductCard(product)).join('');
+
+        // --- ÉTAPE 2 : ON AJUSTE LES POSITIONS ---
+        // Maintenant que les cartes existent dans le DOM, on peut les manipuler.
+        visibleProducts.forEach(product => {
+            if (state.carouselIndices[product.id]) {
+                updateSliderPosition(product.id);
+            }
+        });
     }
 
     function createProductCard(product) {
@@ -285,39 +323,53 @@
                 ? 'Stock deja reserve'
                 : 'Ajouter au panier';
 
+        // On vérifie s'il y a plusieurs images pour afficher les contrôles
+        const hasMultipleImages = product.gallery.length > 1;
+
         return `
-            <article class="product-card">
-                <div class="product-media">
-                    ${product.imageUrl
-                        ? `<img src="${escapeAttribute(product.imageUrl)}" alt="${escapeAttribute(product.name)}">`
-                        : '<div class="product-placeholder">Image indisponible</div>'}
-                    <span class="product-badge">${escapeHtml(getCategoryName(product.categoryId))}</span>
+        <article class="product-card" data-product-id="${product.id}">
+            <div class="product-media">
+                <div class="product-slider">
+                    ${product.gallery.length > 0
+            ? product.gallery.map(url =>
+                `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(product.name)}">`
+            ).join('')
+            : '<div class="product-placeholder">Image indisponible</div>'
+        }
+                </div>
+                
+                <span class="product-badge">${escapeHtml(getCategoryName(product.categoryId))}</span>
+
+                ${hasMultipleImages ? `
+                    <button class="slider-btn prev" aria-label="Image précédente" data-slider-action="prev">❮</button>
+                    <button class="slider-btn next" aria-label="Image suivante" data-slider-action="next">❯</button>
+                ` : ''}
+            </div>
+
+            <div class="product-content">
+                <div class="product-heading">
+                    <h3>${escapeHtml(product.name)}</h3>
+                    <p class="product-price">${formatPrice(product.price)}</p>
                 </div>
 
-                <div class="product-content">
-                    <div class="product-heading">
-                        <h3>${escapeHtml(product.name)}</h3>
-                        <p class="product-price">${formatPrice(product.price)}</p>
-                    </div>
+                <p class="product-description">${escapeHtml(truncateText(product.description, 150))}</p>
 
-                    <p class="product-description">${escapeHtml(truncateText(product.description, 150))}</p>
-
-                    <div class="product-meta">
-                        <span>${product.stock} ${pluralize(product.stock, 'piece', 'pieces')} restantes</span>
-                        <span>${quantityInCart} dans le panier</span>
-                    </div>
+                <div class="product-meta">
+                    <span>${product.stock} ${pluralize(product.stock, 'piece', 'pieces')} restantes</span>
+                    <span>${quantityInCart} dans le panier</span>
                 </div>
+            </div>
 
-                <button
-                    class="primary-button"
-                    type="button"
-                    data-add-to-cart="${product.id}"
-                    ${isOutOfStock || reachedStockLimit ? 'disabled' : ''}
-                >
-                    ${buttonLabel}
-                </button>
-            </article>
-        `;
+            <button
+                class="primary-button"
+                type="button"
+                data-add-to-cart="${product.id}"
+                ${isOutOfStock || reachedStockLimit ? 'disabled' : ''}
+            >
+                ${buttonLabel}
+            </button>
+        </article>
+    `;
     }
 
     function renderCart() {
