@@ -137,4 +137,81 @@ const createOrder = (req, res) => {
     });
 }
 
-module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart, addToCart, deleteFromCart, getOrders, createOrder };
+const updateStock = (req, res) => {
+    connexion.query('UPDATE products SET stock = stock - ? WHERE id = ?', [req.body.quantity, req.params.id], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const getProductAttributes = (req, res) => {
+    connexion.query('SELECT * FROM product_attributes WHERE product_id = ?', [req.params.id], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const getFavorites = (req, res) => {
+    connexion.query('SELECT * FROM favorites WHERE user_id = ?', [req.params.user_id], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const addFavorites = (req, res) => {
+    const user_id = req.body.user_id;
+    const products_id = req.body.products_id;
+    connexion.query('INSERT INTO favorites (user_id, product_id) VALUES (?, ?)', [user_id, products_id], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const deleteFavorite = (req, res) => {
+    connexion.query('DELETE FROM favorites WHERE id = ?', [req.params.id], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const getAddresses = (req, res) => {
+    connexion.query('SELECT * FROM addresses WHERE user_id = ?', [req.params.user_id], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+const addAddresses = (req, res) => {
+    const user_id = req.body.user_id;
+    const street = req.body.street;
+    const city = req.body.city;
+    const postal_code = req.body.postal_code;
+    const country = req.body.country;
+    connexion.query('INSERT INTO addresses (user_id, street, city, postal_code, country) VALUES(?, ?, ?, ?, ?)', [user_id, street, city, postal_code, country], (err, results) => {
+        if(err) {
+            res.status(500).json({ error: err});
+        } else {
+            res.status(200).json(results);
+        }
+    });
+}
+
+module.exports = { getProducts, getProductById, getCategories, getCategoriesById, register, login, getCart, addToCart, deleteFromCart, getOrders, createOrder, updateStock, getProductAttributes, getFavorites, addFavorites, deleteFavorite, getAddresses, addAddresses };

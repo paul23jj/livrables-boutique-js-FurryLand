@@ -21,6 +21,8 @@ CREATE DATABASE IF NOT EXISTS furrylanddb CHARACTER SET utf8mb4 COLLATE utf8mb4_
                description TEXT,
                price DECIMAL(10,2) NOT NULL,
                stock INT DEFAULT 0,
+               discount INT DEFAULT 0,
+               currency VARCHAR(10) DEFAULT 'EUR',
                image_url_1 VARCHAR(255),
                image_url_2 VARCHAR(255),
                image_url_3 VARCHAR(255),
@@ -53,4 +55,30 @@ CREATE DATABASE IF NOT EXISTS furrylanddb CHARACTER SET utf8mb4 COLLATE utf8mb4_
                 quantity INT NOT NULL DEFAULT 1,
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (product_id) REFERENCES products(id)
+           );
+
+           CREATE TABLE product_attributes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                product_id INT NOT NULL,
+                attribute_type VARCHAR(50) NOT NULL,
+                attribute_value VARCHAR(100) NOT NULL,
+                FOREIGN KEY (product_id) REFERENCES products(id)
+           );
+
+           CREATE TABLE favorites (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                product_id INT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (product_id) REFERENCES products(id)
+           );
+
+           CREATE TABLE addresses (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                street VARCHAR(255) NOT NULL,
+                city VARCHAR(100) NOT NULL,
+                postal_code VARCHAR(20) NOT NULL,
+                country VARCHAR(100) DEFAULT 'France',
+                FOREIGN KEY (user_id) REFERENCES users(id)
            );
