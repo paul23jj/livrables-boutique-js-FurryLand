@@ -2,24 +2,46 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, ">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>FurryLand Boutique</title>
     <link rel="stylesheet" href="css/main.css">
     <script src="script/main.js" defer></script>
 </head>
-<body>
+<body data-page="catalog">
     <main id="app">
         <div class="page-shell">
+            <header class="topbar">
+                <a class="brand" href="index.html">FurryLand</a>
+                <nav class="topbar-nav" aria-label="Navigation principale">
+                    <a class="topbar-link" href="#catalogue">Catalogue</a>
+                    <a class="topbar-link" href="#cart-panel">
+                        Panier
+                        <span id="header-cart-count" class="count-pill">0</span>
+                    </a>
+                    <div id="topbar-account-slot" class="topbar-account-slot"></div>
+                </nav>
+            </header>
+
             <header class="hero">
                 <div class="hero-copy">
                     <p class="eyebrow">FurryLand</p>
                     <h1>Boutique furry et fursuit</h1>
                     <p class="hero-text">
-                        Explore le catalogue, filtre par categorie et ajoute des articles
-                        dans un panier local pour preparer la suite du front.
+                        Explore le catalogue, ouvre une vraie fiche produit, prepare ton adresse
+                        de livraison et connecte ton compte avant l'envoi de commande.
                     </p>
+                    <div class="hero-actions">
+                        <a class="hero-link" href="#catalogue">Explorer le catalogue</a>
+                        <button
+                            id="hero-auth-button"
+                            class="secondary-button"
+                            type="button"
+                            data-open-auth
+                        >
+                            Connexion / inscription
+                        </button>
+                    </div>
                 </div>
                 <div class="hero-stats">
                     <article class="stat-card">
@@ -40,6 +62,24 @@
                     </article>
                 </div>
             </header>
+
+            <section class="account-banner" aria-labelledby="account-banner-title">
+                <div id="account-summary" class="account-summary">
+                    <div class="account-copy">
+                        <p class="section-overline">Compte</p>
+                        <h2 id="account-banner-title">Aucun utilisateur connecte</h2>
+                        <p>
+                            Connecte-toi pour relier le panier, la livraison et la commande a un
+                            user_id cote frontend.
+                        </p>
+                    </div>
+                    <div class="account-actions">
+                        <button class="secondary-button" type="button" data-open-auth>
+                            Ouvrir le compte
+                        </button>
+                    </div>
+                </div>
+            </section>
 
             <section class="toolbar" aria-label="Filtres du catalogue">
                 <label class="field">
@@ -74,7 +114,7 @@
             <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
 
             <section class="layout">
-                <section class="catalogue-panel" aria-labelledby="catalogue-title">
+                <section id="catalogue" class="catalogue-panel" aria-labelledby="catalogue-title">
                     <div class="section-heading">
                         <div>
                             <p class="section-overline">Catalogue</p>
@@ -85,19 +125,78 @@
                     <div id="products-grid" class="products-grid"></div>
                 </section>
 
-                <aside class="cart-panel" aria-labelledby="cart-title">
+                <aside id="cart-panel" class="cart-panel" aria-labelledby="cart-title">
                     <div class="section-heading">
                         <div>
                             <p class="section-overline">Panier</p>
-                            <h2 id="cart-title">Selection locale</h2>
+                            <h2 id="cart-title">Selection front</h2>
                         </div>
                         <p id="cart-count" class="results-count">0 article</p>
                     </div>
+
                     <div id="cart-items" class="cart-items"></div>
+
                     <div class="cart-summary">
                         <p>Total estime</p>
                         <strong id="cart-total">0,00 EUR</strong>
                     </div>
+
+                    <section class="panel-section" aria-labelledby="shipping-title">
+                        <div class="section-heading compact-heading">
+                            <div>
+                                <p class="section-overline">Livraison</p>
+                                <h3 id="shipping-title">Adresse de livraison</h3>
+                            </div>
+                        </div>
+
+                        <form id="shipping-form" class="shipping-form">
+                            <div class="field-row">
+                                <label class="field">
+                                    <span>Nom complet</span>
+                                    <input id="shipping-full-name" name="fullName" type="text" autocomplete="name">
+                                </label>
+                                <label class="field">
+                                    <span>Pays</span>
+                                    <input id="shipping-country" name="country" type="text" autocomplete="country-name">
+                                </label>
+                            </div>
+
+                            <label class="field">
+                                <span>Adresse</span>
+                                <input id="shipping-line1" name="line1" type="text" autocomplete="address-line1">
+                            </label>
+
+                            <label class="field">
+                                <span>Complement</span>
+                                <input id="shipping-line2" name="line2" type="text" autocomplete="address-line2">
+                            </label>
+
+                            <div class="field-row">
+                                <label class="field">
+                                    <span>Ville</span>
+                                    <input id="shipping-city" name="city" type="text" autocomplete="address-level2">
+                                </label>
+                                <label class="field">
+                                    <span>Code postal</span>
+                                    <input id="shipping-postal-code" name="postalCode" type="text" autocomplete="postal-code">
+                                </label>
+                            </div>
+
+                            <label class="field">
+                                <span>Instructions</span>
+                                <textarea id="shipping-notes" name="notes" rows="3"></textarea>
+                            </label>
+                        </form>
+                    </section>
+
+                    <p id="checkout-hint" class="mini-note">
+                        Connecte-toi puis complete l'adresse avant d'envoyer la commande.
+                    </p>
+
+                    <button id="checkout-button" class="primary-button wide" type="button">
+                        Passer la commande
+                    </button>
+
                     <button id="clear-cart-button" class="secondary-button" type="button">
                         Vider le panier
                     </button>
@@ -105,5 +204,56 @@
             </section>
         </div>
     </main>
+
+    <div id="auth-modal" class="modal" hidden>
+        <div class="modal-backdrop" data-close-modal></div>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+            <button class="modal-close" type="button" aria-label="Fermer" data-close-modal>
+                Fermer
+            </button>
+
+            <p class="section-overline">Compte</p>
+            <h2 id="auth-title">Connexion ou inscription</h2>
+            <p class="modal-copy">
+                Le frontend stocke ensuite id, username et email dans le navigateur pour les
+                appels API qui dependent du user_id.
+            </p>
+
+            <div class="auth-tabs" role="tablist" aria-label="Choix du formulaire">
+                <button class="auth-tab" type="button" data-auth-mode="login">Connexion</button>
+                <button class="auth-tab" type="button" data-auth-mode="register">Inscription</button>
+            </div>
+
+            <form id="login-form" class="auth-form">
+                <label class="field">
+                    <span>Email</span>
+                    <input name="email" type="email" autocomplete="email" required>
+                </label>
+                <label class="field">
+                    <span>Mot de passe</span>
+                    <input name="password" type="password" autocomplete="current-password" required>
+                </label>
+                <button class="primary-button wide" type="submit">Se connecter</button>
+            </form>
+
+            <form id="register-form" class="auth-form" hidden>
+                <label class="field">
+                    <span>Nom utilisateur</span>
+                    <input name="username" type="text" autocomplete="username" required>
+                </label>
+                <label class="field">
+                    <span>Email</span>
+                    <input name="email" type="email" autocomplete="email" required>
+                </label>
+                <label class="field">
+                    <span>Mot de passe</span>
+                    <input name="password" type="password" autocomplete="new-password" required>
+                </label>
+                <button class="primary-button wide" type="submit">Creer le compte</button>
+            </form>
+
+            <p id="auth-feedback" class="inline-feedback" role="status" aria-live="polite" hidden></p>
+        </section>
+    </div>
 </body>
 </html>

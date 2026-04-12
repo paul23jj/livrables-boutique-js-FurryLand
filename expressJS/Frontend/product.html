@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FurryLand Produit</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="script/main.js" defer></script>
+</head>
+<body data-page="product">
+    <main id="app">
+        <div class="page-shell">
+            <header class="topbar">
+                <a class="brand" href="index.html">FurryLand</a>
+                <nav class="topbar-nav" aria-label="Navigation principale">
+                    <a class="topbar-link" href="index.html">Boutique</a>
+                    <a class="topbar-link" href="index.html#cart-panel">
+                        Panier
+                        <span id="header-cart-count" class="count-pill">0</span>
+                    </a>
+                    <div id="topbar-account-slot" class="topbar-account-slot"></div>
+                </nav>
+            </header>
+
+            <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+
+            <section class="detail-shell" aria-labelledby="detail-page-title">
+                <div class="detail-breadcrumb">
+                    <a href="index.html">Retour a la boutique</a>
+                    <span>/</span>
+                    <span id="detail-breadcrumb-name">Produit</span>
+                </div>
+
+                <section id="product-detail-view" class="product-detail-view" aria-labelledby="detail-page-title">
+                    <article class="empty-state">
+                        <h3 id="detail-page-title">Chargement du produit</h3>
+                        <p>La fiche detaillee est en preparation.</p>
+                    </article>
+                </section>
+            </section>
+
+            <section class="catalogue-panel similar-panel" aria-labelledby="similar-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-overline">Suggestions</p>
+                        <h2 id="similar-title">Produits similaires</h2>
+                    </div>
+                    <a class="detail-link" href="index.html">Retour catalogue</a>
+                </div>
+                <div id="similar-products" class="products-grid"></div>
+            </section>
+        </div>
+    </main>
+
+    <div id="auth-modal" class="modal" hidden>
+        <div class="modal-backdrop" data-close-modal></div>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+            <button class="modal-close" type="button" aria-label="Fermer" data-close-modal>
+                Fermer
+            </button>
+
+            <p class="section-overline">Compte</p>
+            <h2 id="auth-title">Connexion ou inscription</h2>
+            <p class="modal-copy">
+                Connecte-toi pour preparer les appels commande avec un user_id stocke cote front.
+            </p>
+
+            <div class="auth-tabs" role="tablist" aria-label="Choix du formulaire">
+                <button class="auth-tab" type="button" data-auth-mode="login">Connexion</button>
+                <button class="auth-tab" type="button" data-auth-mode="register">Inscription</button>
+            </div>
+
+            <form id="login-form" class="auth-form">
+                <label class="field">
+                    <span>Email</span>
+                    <input name="email" type="email" autocomplete="email" required>
+                </label>
+                <label class="field">
+                    <span>Mot de passe</span>
+                    <input name="password" type="password" autocomplete="current-password" required>
+                </label>
+                <button class="primary-button wide" type="submit">Se connecter</button>
+            </form>
+
+            <form id="register-form" class="auth-form" hidden>
+                <label class="field">
+                    <span>Nom utilisateur</span>
+                    <input name="username" type="text" autocomplete="username" required>
+                </label>
+                <label class="field">
+                    <span>Email</span>
+                    <input name="email" type="email" autocomplete="email" required>
+                </label>
+                <label class="field">
+                    <span>Mot de passe</span>
+                    <input name="password" type="password" autocomplete="new-password" required>
+                </label>
+                <button class="primary-button wide" type="submit">Creer le compte</button>
+            </form>
+
+            <p id="auth-feedback" class="inline-feedback" role="status" aria-live="polite" hidden></p>
+        </section>
+    </div>
+</body>
+</html>
