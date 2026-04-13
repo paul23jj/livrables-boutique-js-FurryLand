@@ -15,6 +15,10 @@
                 <a class="brand" href="index.html">FurryLand</a>
                 <nav class="topbar-nav" aria-label="Navigation principale">
                     <a class="topbar-link" href="#catalogue">Catalogue</a>
+                    <a class="topbar-link" href="#favorites-panel">
+                        &#9829; Favoris
+                        <span id="header-favorites-count" class="count-pill">0</span>
+                    </a>
                     <a class="topbar-link" href="#cart-panel">
                         Panier
                         <span id="header-cart-count" class="count-pill">0</span>
@@ -79,6 +83,17 @@
                         </button>
                     </div>
                 </div>
+            </section>
+
+            <section id="favorites-panel" class="catalogue-panel favorites-panel" aria-labelledby="favorites-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-overline">&#9829; Favoris</p>
+                        <h2 id="favorites-title">Tes articles favoris</h2>
+                    </div>
+                    <p id="favorites-count" class="results-count">0 favori</p>
+                </div>
+                <div id="favorites-grid" class="products-grid"></div>
             </section>
 
             <section class="toolbar" aria-label="Filtres du catalogue">

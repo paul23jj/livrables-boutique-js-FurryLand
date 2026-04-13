@@ -2,6 +2,7 @@
     const PAGE = document.body.dataset.page || 'catalog';
     const API_BASE = document.body.dataset.apiBase || `${window.location.origin}/api`;
     const CART_STORAGE_KEY = 'furryland-cart-v2';
+    const FAVORITES_STORAGE_KEY = 'furryland-favorites';
     const USER_STORAGE_KEY = 'furryland-user';
     const SHIPPING_STORAGE_KEY = 'furryland-shipping';
     const ORDER_DRAFT_STORAGE_KEY = 'furryland-order-drafts';
@@ -50,6 +51,7 @@
         searchTerm: '',
         sortBy: 'featured',
         cart: loadCart(),
+        favorites: loadFavorites(),
         user: loadUser(),
         shipping: loadShipping(),
         selectedColors: {},
@@ -84,9 +86,12 @@
     function cacheRefs() {
         refs.statusMessage = document.getElementById('status-message');
         refs.headerCartCount = document.getElementById('header-cart-count');
+        refs.headerFavoritesCount = document.getElementById('header-favorites-count');
         refs.topbarAccountSlot = document.getElementById('topbar-account-slot');
         refs.heroAuthButton = document.getElementById('hero-auth-button');
         refs.accountSummary = document.getElementById('account-summary');
+        refs.favoritesCount = document.getElementById('favorites-count');
+        refs.favoritesGrid = document.getElementById('favorites-grid');
         refs.searchInput = document.getElementById('search-input');
         refs.categorySelect = document.getElementById('category-select');
         refs.sortSelect = document.getElementById('sort-select');
@@ -189,6 +194,12 @@
             return;
         }
 
+        const favoriteButton = event.target.closest('[data-toggle-favorite]');
+        if (favoriteButton) {
+            toggleFavorite(Number(favoriteButton.dataset.toggleFavorite));
+            return;
+        }
+
         const addButton = event.target.closest('[data-add-to-cart]');
         if (addButton) {
             addToCart(Number(addButton.dataset.addToCart), addButton.dataset.colorId || '');
@@ -275,6 +286,7 @@
             ? categoriesResult.value.map(normalizeCategory)
             : [];
 
+        syncFavoritesWithProducts();
         syncCartWithProducts();
         initSelectedColors();
 
@@ -408,8 +420,10 @@
         renderAccountSummary();
         renderAuthModal();
         renderStats();
+        renderFavoritesCount();
 
         if (PAGE === 'catalog') {
+            renderFavorites();
             renderFilters();
             renderProducts();
             renderShippingForm();
@@ -543,6 +557,51 @@
         }
     }
 
+    function renderFavoritesCount() {
+        if (refs.headerFavoritesCount) {
+            refs.headerFavoritesCount.textContent = String(state.favorites.length);
+        }
+
+        if (refs.favoritesCount) {
+            refs.favoritesCount.textContent = `${state.favorites.length} ${pluralize(state.favorites.length, 'favori', 'favoris')}`;
+        }
+    }
+
+    function renderFavorites() {
+        if (!refs.favoritesGrid) {
+            return;
+        }
+
+        if (state.isLoading) {
+            refs.favoritesGrid.innerHTML = createSkeletonCards(2);
+            return;
+        }
+
+        if (state.products.length === 0) {
+            refs.favoritesGrid.innerHTML = `
+                <article class="empty-state compact">
+                    <h3>Favoris indisponibles</h3>
+                    <p>Le catalogue doit etre charge avant d afficher les favoris.</p>
+                </article>
+            `;
+            return;
+        }
+
+        const favoriteProducts = state.products.filter((product) => isFavorite(product.id));
+
+        if (favoriteProducts.length === 0) {
+            refs.favoritesGrid.innerHTML = `
+                <article class="empty-state compact">
+                    <h3>Aucun favori</h3>
+                    <p>Appuie sur le coeur en haut a droite d un article pour le garder ici.</p>
+                </article>
+            `;
+            return;
+        }
+
+        refs.favoritesGrid.innerHTML = favoriteProducts.map(createProductCard).join('');
+    }
+
     function renderFilters() {
         if (!refs.categorySelect || !refs.sortSelect || !refs.searchInput) {
             return;
@@ -601,6 +660,7 @@
         const quantityInCart = getQuantityInCart(product.id);
         const selectedColor = getSelectedColor(product);
         const disabled = product.stock <= 0 || quantityInCart >= product.stock;
+        const favoriteActive = isFavorite(product.id);
 
         return `
             <article class="product-card">
@@ -616,6 +676,15 @@
                         <div class="product-placeholder">Image indisponible</div>
                     `}
                     <span class="product-badge">${escapeHtml(getCategoryName(product.categoryId))}</span>
+                    <button
+                        class="favorite-button ${favoriteActive ? 'is-active' : ''}"
+                        type="button"
+                        data-toggle-favorite="${product.id}"
+                        aria-label="${favoriteActive ? 'Retirer des favoris' : 'Ajouter aux favoris'}"
+                        aria-pressed="${favoriteActive ? 'true' : 'false'}"
+                    >
+                        &#9829;
+                    </button>
                 </div>
 
                 <div class="product-content">
@@ -1049,6 +1118,31 @@
             .filter(Boolean);
     }
 
+    function toggleFavorite(productId) {
+        if (!Number.isInteger(productId) || productId <= 0) {
+            return;
+        }
+
+        const product = state.products.find((entry) => entry.id === productId);
+
+        if (isFavorite(productId)) {
+            state.favorites = state.favorites.filter((id) => id !== productId);
+            persistFavorites();
+            setStatus(product ? `"${product.name}" a ete retire des favoris.` : 'Article retire des favoris.', 'info');
+            renderAll();
+            return;
+        }
+
+        state.favorites.push(productId);
+        persistFavorites();
+        setStatus(product ? `"${product.name}" a ete ajoute aux favoris.` : 'Article ajoute aux favoris.', 'success');
+        renderAll();
+    }
+
+    function isFavorite(productId) {
+        return state.favorites.includes(productId);
+    }
+
     function getQuantityInCart(productId) {
         return state.cart.reduce((total, item) => item.productId === productId ? total + item.quantity : total, 0);
     }
@@ -1087,6 +1181,20 @@
 
         state.cart = nextCart;
         persistCart();
+    }
+
+    function syncFavoritesWithProducts() {
+        if (state.products.length === 0) {
+            return;
+        }
+
+        const availableIds = new Set(state.products.map((product) => product.id));
+        const nextFavorites = state.favorites.filter((productId) => availableIds.has(productId));
+
+        if (nextFavorites.length !== state.favorites.length) {
+            state.favorites = nextFavorites;
+            persistFavorites();
+        }
     }
 
     function handleShippingInput() {
@@ -1345,6 +1453,22 @@
 
     function persistCart() {
         writeJson(CART_STORAGE_KEY, state.cart, 'Impossible de sauvegarder le panier dans le navigateur.');
+    }
+
+    function loadFavorites() {
+        const data = readJson(FAVORITES_STORAGE_KEY, []);
+
+        if (!Array.isArray(data)) {
+            return [];
+        }
+
+        return data
+            .map((productId) => Number(productId))
+            .filter((productId, index, array) => Number.isInteger(productId) && productId > 0 && array.indexOf(productId) === index);
+    }
+
+    function persistFavorites() {
+        writeJson(FAVORITES_STORAGE_KEY, state.favorites, 'Impossible de sauvegarder les favoris dans le navigateur.');
     }
 
     function loadUser() {
